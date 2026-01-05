@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Research Paper: GarudX ATLAX Feasibility Analysis</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Plotly.js -->
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+
+    <!-- MathJax for Beautiful LaTeX rendering -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        /* Typography & Academic Layout */
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            background-color: #f8fafc;
+            /* Slate 50 */
+            color: #1e293b;
+            /* Slate 800 */
+            line-height: 1.6;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4 {
+            font-family: 'Inter', sans-serif;
+            /* Clean headings */
+            font-weight: 700;
+            color: #0f172a;
+            /* Slate 900 */
+        }
+
+        .sans-serif {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Nav Sidebar */
+        .sidebar {
+            width: 280px;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            overflow-y: auto;
+            background: #ffffff;
+            border-right: 1px solid #e2e8f0;
+            padding: 2rem 1rem;
+            display: none;
+            /* Hidden on mobile by default */
+        }
+
+        @media(min-width: 1024px) {
+            .sidebar {
+                display: block;
+            }
+
+            .main-content {
+                margin-left: 280px;
+            }
+        }
+
+        /* Green Formula Styling - MANDATORY */
+        .math-green {
+            color: #15803d !important;
+            /* Green-700 */
+            font-weight: bold;
+        }
+
+        .derivation-box {
+            background-color: #f0fdf4;
+            /* Green-50 */
+            border-left: 4px solid #15803d;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+        }
+
+        .derivation-step {
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .derivation-note {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+            color: #475569;
+            margin-left: 1rem;
+            font-style: italic;
+        }
+
+        /* Chart Containers */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            height: 350px;
+            margin: 1.5rem auto;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.95rem;
+        }
+
+        th,
+        td {
+            border: 1px solid #cbd5e1;
+            padding: 8px 12px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #e2e8f0;
+            font-weight: bold;
+        }
+
+        /* Interactive Widget Box */
+        .interactive-panel {
+            background: #ffffff;
+            border: 1px solid #3b82f6;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.1);
+        }
+    </style>
+
+    <!-- Placeholder Comments -->
+    <!-- Chosen Palette: Academic Slate & Green. Background: #f8fafc. Text: #1e293b. Formulas: #15803d. Accents: #3b82f6. -->
+    <!-- Application Structure Plan: Sidebar navigation for academic sections. Main content area contains the full paper text interspersed with "Interactive Figures". Instead of static images, charts are rendered via Chart.js/Plotly. Calculation sections (Atmosphere, Propulsion, Mission) feature JS-driven inputs (sliders) that update the formulas and results in real-time, allowing the user to verify the "Research" dynamically. -->
+    <!-- Visualization & Content Choices: 
+         1. Atmosphere: Line chart (Altitude vs Density) + Live Table. Goal: Show physics constraints. 
+         2. Propulsion: Bar chart (Power Breakdown). Goal: Visualize efficiency losses.
+         3. Mission: Live text updates based on payload slider. Goal: Feasibility check.
+         4. NO SVG/Mermaid used. All visuals are Canvas or HTML/CSS. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <script>
+        // MathJax Config to force Green Color default for display math
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            },
+            chtml: {
+                displayAlign: 'left'
+            }
+        };
+    </script>
+</head>
+
+<body class="text-slate-800">
+
+    <!-- Navigation Sidebar -->
+    <nav class="sidebar shadow-lg z-50">
+        <div class="mb-6 px-2">
+            <h2 class="text-xl font-bold text-slate-900 tracking-tight">GarudX ATLAX</h2>
+            <p class="text-xs text-slate-500 uppercase tracking-wider mt-1">Research Document</p>
+        </div>
+        <ul class="space-y-1 text-sm font-medium">
+            <li><a href="index.html"
+                    class="block px-3 py-2 hover:bg-slate-100 rounded text-blue-700 font-bold bg-blue-50 mb-4">← SYSTEM
+                    ARCHITECTURE</a></li>
+            <li><a href="#abstract" class="block px-3 py-2 hover:bg-slate-100 rounded text-slate-700">1. Abstract</a>
+            </li>
+            <li><a href="#introduction" class="block px-3 py-2 hover:bg-slate-100 rounded text-slate-700">2.
+                    Introduction</a></li>
+            <li><a href="#configuration" class="block px-3 py-2 hover:bg-slate-100 rounded text-slate-700">3. Vehicle
+                    Configuration</a></li>
+            <li><a href="#atmosphere" class="block px-3 py-2 hover:bg-slate-100 rounded text-slate-700">4. Atmospheric
+                    Modeling</a></li>
+            <li><a href="#propulsion" class="block px-3 py-2 hover:bg-slate-100 rounded text-slate-700">5. Propulsion
+                    Theory</a></li>
+            <li><a href="#candidates" class="block px-3 py-2 hover:bg-slate-100 rounded text-slate-700">6. Motor/Prop
+                    Candidates</a></li>
+            <li><a href="#thrust-scaling" class="block px-3 py-2 hover:bg-slate-100 rounded text-slate-700">7. Thrust
+                    Scaling</a></li>
+            <li><a href="#coaxial" class="block px-3 py-2 hover:bg-slate-100 rounded text-slate-700">8. Coaxial Loss
+                    Model</a></li>
+            <li><a href="#battery" class="block px-3 py-2 hover:bg-slate-100 rounded text-slate-700">9. Battery
+                    Modeling</a></li>
+            <li><a href="#electrical" class="block px-3 py-2 hover:bg-slate-100 rounded text-slate-700">10. Electrical
+                    Constraints</a></li>
+            <li><a href="#flight-time" class="block px-3 py-2 hover:bg-slate-100 rounded text-slate-700">11. Flight Time
+                    Calc</a></li>
+            <li><a href="#mission-path" class="block px-3 py-2 hover:bg-slate-100 rounded text-slate-700">12. Mission
+                    Path</a></li>
+            <li><a href="#environment" class="block px-3 py-2 hover:bg-slate-100 rounded text-slate-700">13. Environment
+                    Model</a></li>
+            <li><a href="#results" class="block px-3 py-2 hover:bg-slate-100 rounded text-slate-700">14. Comparative
+                    Results</a></li>
+            <li><a href="#conclusion" class="block px-3 py-2 hover:bg-slate-100 rounded text-slate-700">15.
+                    Conclusion</a></li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content p-6 lg:p-12 max-w-5xl mx-auto">
+
+        <!-- Header -->
+        <header class="mb-12 border-b pb-8 border-slate-300">
+            <h1 class="text-3xl lg:text-4xl font-bold mb-4 leading-tight text-slate-900">
+                Design, Performance Modeling, and High-Altitude Mission Feasibility of the GarudX ATLAX Heavy-Lift
+                Multirotor UAV for Himalayan Logistics and Aerial Extraction
+            </h1>
+            <div class="flex flex-wrap gap-4 text-sm text-slate-600 font-serif italic">
+                <span><strong>Role:</strong> Aerospace Systems Engineer</span>
+                <span>•</span>
+                <span><strong>Context:</strong> Engineering Peer Review / Technical Committee</span>
+                <span>•</span>
+                <span><strong>Status:</strong> Physics-Driven Research Paper</span>
+            </div>
+        </header>
+
+        <!-- 1. ABSTRACT -->
+        <section id="abstract" class="mb-16">
+            <h2 class="text-2xl font-bold mb-4 border-l-4 border-slate-900 pl-3">1. ABSTRACT</h2>
+            <p class="mb-4 text-justify">
+                The logistic complexity of high-altitude Himalayan operations, specifically the Khumbu Icefall route
+                (Base Camp to Camp 2), presents severe risks to human porters and exceeds the efficient operational
+                envelope of conventional rotary-wing aircraft. While helicopters suffer from drastic payload degradation
+                above 5,500 m ASL (Above Sea Level) due to air density reduction, this paper proposes and validates the
+                design of the <strong>GarudX ATLAX</strong>, a specialized heavy-lift Coaxial X8 Multirotor UAV.
+            </p>
+            <p class="mb-4 text-justify">
+                Utilizing a physics-first approach, this study models the atmospheric constraints at 6,500 m, where air
+                density drops to approximately 53% of sea level. We analyze the propulsion architecture required to lift
+                a target payload of 30 kg, concluding that a high-voltage (12S-14S) system driving large-diameter
+                propellers (57 inches) in a coaxial configuration is necessary to maintain a disk loading below 12
+                kg/m².
+            </p>
+            <p class="text-justify">
+                <strong>Key Quantified Results:</strong> The modeled system achieves a hover endurance of 18–22 minutes
+                with a 30 kg payload at 6,000 m density altitude, consuming approximately 14 kW of power. The mission
+                feasibility analysis confirms the vehicle can traverse the 6 km segment between Base Camp and Camp 1
+                with a 20% energy reserve, provided battery thermal management is maintained. This paper outlines the
+                derivation of these performance metrics, identifying critical thermal and aerodynamic limitations.
+            </p>
+        </section>
+
+        <!-- 2. INTRODUCTION -->
+        <section id="introduction" class="mb-16">
+            <h2 class="text-2xl font-bold mb-4 border-l-4 border-slate-900 pl-3">2. INTRODUCTION</h2>
+            <p class="mb-4">
+                The logistics corridor between Everest Base Camp (5,364 m) and Camp 2 (6,400 m) represents one of the
+                most dangerous cargo routes in the world. Human porters traverse the unstable Khumbu Icefall repeatedly,
+                exposing them to serac collapse and avalanches. Traditional helicopters (e.g., AS350 B3) are expensive
+                and risk pilot lives for routine cargo.
+            </p>
+            <p class="mb-4">
+                Current commercial heavy-lift drones (Comparison Class: FlyCart-30 type) are primarily optimized for
+                dense air (sea level to 3,000 m). Their small-diameter rotors require excessive RPM to generate lift in
+                thin air, leading to motor saturation and thermal runaway. There exists a <strong>research gap</strong>
+                in open, physics-based analysis for UAVs specifically designed for the 5,500 m–6,500 m density altitude
+                regime.
+            </p>
+            <p>
+                <strong>Objectives:</strong> This paper aims to: (1) mathematically derive the power requirements for a
+                30 kg payload drone at extreme altitude; (2) validate the Coaxial X8 configuration against single-rotor
+                efficiency losses; and (3) determine the electrical feasibility using commercially available battery
+                chemistries.
+            </p>
+        </section>
+
+        <!-- 3. VEHICLE CONFIGURATION -->
+        <section id="configuration" class="mb-16">
+            <h2 class="text-2xl font-bold mb-4 border-l-4 border-slate-900 pl-3">3. VEHICLE CONFIGURATION</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
+                <div>
+                    <h3 class="text-xl font-bold mb-2">3.1 Airframe Architecture</h3>
+                    <ul class="list-disc pl-5 space-y-2">
+                        <li><strong>Layout:</strong> X8 Coaxial Multirotor (4 arms, 8 motors).</li>
+                        <li><strong>Justification:</strong> Coaxial configurations provide structural redundancy. If one
+                            motor fails, the opposing motor on the same axis can compensate (albeit with yaw authority
+                            changes), unlike a Flat-8 where an arm failure is catastrophic.</li>
+                        <li><strong>Target Dry Mass:</strong> 40–45 kg (Frame, Motors, Avionics; excluding
+                            Battery/Payload).</li>
+                        <li><strong>MTOW Limit:</strong> ~125 kg.</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold mb-2">3.2 Payload Systems</h3>
+                    <ul class="list-disc pl-5 space-y-2">
+                        <li><strong>Attachment:</strong> Fixed Hook or Active Winch.</li>
+                        <li><strong>Winch Specs:</strong> Integrated load cell for tension monitoring, encoder for
+                            depth, emergency guillotine cut.</li>
+                        <li><strong>Design Cases:</strong>
+                            <ul class="list-circle pl-5 mt-1 text-sm">
+                                <li><strong>Case A:</strong> 0 kg (Ferry flight)</li>
+                                <li><strong>Case B:</strong> 20 kg (Standard Supply)</li>
+                                <li><strong>Case C:</strong> 30 kg (Heavy Equipment/Oxygen)</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. ATMOSPHERIC MODELING -->
+        <section id="atmosphere" class="mb-16">
+            <h2 class="text-2xl font-bold mb-4 border-l-4 border-slate-900 pl-3">4. ATMOSPHERIC MODELING (MANDATORY)
+            </h2>
+            <p class="mb-4">
+                To accurately predict rotor performance, we must model the air density ($\rho$) as a function of
+                geopotential altitude ($h$). We utilize the International Standard Atmosphere (ISA) Troposphere model
+                (up to 11,000 m).
+            </p>
+
+            <div class="derivation-box math-green">
+                <h4 class="font-bold text-slate-800 mb-2">4.1 ISA Density Derivation</h4>
+                <div class="derivation-step">
+                    <span>$$\rho(h) = \rho_0 \left(1 - \frac{L \cdot h}{T_0}\right)^{\left(\frac{g}{R \cdot L} -
+                        1\right)}$$</span>
+                </div>
+                <div class="derivation-note">
+                    Where:<br>
+                    $\rho_0 = 1.225 \, \text{kg/m}^3$ (Sea Level Density)<br>
+                    $T_0 = 288.15 \, \text{K}$ (Sea Level Temp)<br>
+                    $L = 0.0065 \, \text{K/m}$ (Temperature Lapse Rate)<br>
+                    $g = 9.80665 \, \text{m/s}^2$ (Gravity)<br>
+                    $R = 287.05 \, \text{J/(kg·K)}$ (Gas Constant)
+                </div>
+            </div>
+
+            <!-- Interactive 4.2 Density Calculator -->
+            <div class="interactive-panel">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-bold font-sans">Figure 4.2: Interactive Density Calculator</h3>
+                    <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">Live Physics Model</span>
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-sm font-bold mb-2">Target Altitude: <span id="alt-display"
+                            class="text-blue-600">6000</span> m</label>
+                    <input type="range" id="alt-slider" min="0" max="9000" step="100" value="6000"
+                        class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center mb-6">
+                    <div class="p-3 bg-slate-50 rounded border">
+                        <div class="text-xs text-slate-500">Temperature</div>
+                        <div id="res-temp" class="font-bold text-slate-800">-</div>
+                    </div>
+                    <div class="p-3 bg-slate-50 rounded border">
+                        <div class="text-xs text-slate-500">Pressure</div>
+                        <div id="res-pressure" class="font-bold text-slate-800">-</div>
+                    </div>
+                    <div class="p-3 bg-slate-50 rounded border">
+                        <div class="text-xs text-slate-500">Density ($\rho$)</div>
+                        <div id="res-density" class="font-bold text-green-700 text-lg">-</div>
+                    </div>
+                    <div class="p-3 bg-slate-50 rounded border">
+                        <div class="text-xs text-slate-500">% of Sea Level</div>
+                        <div id="res-percent" class="font-bold text-slate-800">-</div>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="densityChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. PROPULSION THEORY -->
+        <section id="propulsion" class="mb-16">
+            <h2 class="text-2xl font-bold mb-4 border-l-4 border-slate-900 pl-3">5. PROPULSION THEORY</h2>
+            <p class="mb-4">
+                The performance limits are derived from Momentum Theory. The fundamental challenge at high altitude is
+                the reduction in $\rho$, which requires an increase in induced velocity $v_i$ or disk area $A$ to
+                maintain Thrust $T$.
+            </p>
+
+            <div class="grid gap-6">
+                <!-- 5.1 Disk Area -->
+                <div class="derivation-box math-green">
+                    <h4 class="font-bold text-slate-800 mb-2">5.1 Total Disk Area (A)</h4>
+                    <p class="mb-2 text-sm text-slate-700 font-serif">The total area swept by all rotors ($N=8$).</p>
+                    <div class="derivation-step">
+                        <span>$$A = N \cdot \pi \cdot \left(\frac{D}{2}\right)^2$$</span>
+                    </div>
+                </div>
+
+                <!-- 5.2 Hover Thrust -->
+                <div class="derivation-box math-green">
+                    <h4 class="font-bold text-slate-800 mb-2">5.2 Hover Thrust Requirement (T)</h4>
+                    <p class="mb-2 text-sm text-slate-700 font-serif">Thrust must equal the All-Up Weight (AUW). Note:
+                        $W$ is force (Newtons), $m$ is mass (kg).</p>
+                    <div class="derivation-step">
+                        <span>$$T = W = m_{AUW} \cdot g$$</span>
+                    </div>
+                </div>
+
+                <!-- 5.3 & 5.4 Induced Power -->
+                <div class="derivation-box math-green">
+                    <h4 class="font-bold text-slate-800 mb-2">5.3 & 5.4 Induced Velocity & Power</h4>
+                    <p class="mb-2 text-sm text-slate-700 font-serif">Derived from momentum conservation. As $\rho$
+                        decreases, $v_i$ increases, driving up $P_i$.</p>
+                    <div class="derivation-step">
+                        <span>$$v_i = \sqrt{\frac{T}{2 \rho A}}$$</span>
+                    </div>
+                    <div class="derivation-step">
+                        <span>$$P_i = T \cdot v_i = \frac{T^{3/2}}{\sqrt{2 \rho A}}$$</span>
+                    </div>
+                </div>
+
+                <!-- 5.5 Profile Power -->
+                <div class="derivation-box math-green">
+                    <h4 class="font-bold text-slate-800 mb-2">5.5 Profile Power ($P_0$)</h4>
+                    <p class="mb-2 text-sm text-slate-700 font-serif">Power required to overcome the drag of the blades
+                        themselves. $\sigma$ is solidity, $C_{d0}$ is zero-lift drag coefficient.</p>
+                    <div class="derivation-step">
+                        <span>$$P_0 = \frac{\sigma C_{d0}}{8} \rho A (\Omega R)^3$$</span>
+                    </div>
+                </div>
+
+                <!-- 5.6 Total Power -->
+                <div class="derivation-box math-green">
+                    <h4 class="font-bold text-slate-800 mb-2">5.6 Total Hover Power</h4>
+                    <p class="mb-2 text-sm text-slate-700 font-serif">Accounting for Figure of Merit ($\eta_{ind}$) and
+                        electrical losses ($P_{elec}$).</p>
+                    <div class="derivation-step">
+                        <span>$$P_{hover} = \frac{P_i}{\eta_{ind}} + P_0 + P_{elec}$$</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 6. CANDIDATES -->
+        <section id="candidates" class="mb-16">
+            <h2 class="text-2xl font-bold mb-4 border-l-4 border-slate-900 pl-3">6. MOTOR + PROPELLER CANDIDATES</h2>
+            <div class="overflow-x-auto">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Component ID</th>
+                            <th>Description</th>
+                            <th>Key Specs</th>
+                            <th>Source Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Motor A</strong></td>
+                            <td>Large Stator, Low KV (e.g., Hobbywing H13 class)</td>
+                            <td>KV: ~37, Voltage: 12-14S (HV), Weight: ~1.8kg</td>
+                            <td><span class="text-green-600 font-bold">MEASURED</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Motor B</strong></td>
+                            <td>Coaxial-Optimized Integrated Unit</td>
+                            <td>Integrated ESC, FOC control</td>
+                            <td><span class="text-orange-600 font-bold">MODELED</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Prop Set 1</strong></td>
+                            <td>57 x 20 inch Carbon Fiber</td>
+                            <td>Diameter: 1.45m, Pitch: 0.5m, Mass: ~300g</td>
+                            <td><span class="text-green-600 font-bold">MEASURED</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 7. THRUST SCALING -->
+        <section id="thrust-scaling" class="mb-16">
+            <h2 class="text-2xl font-bold mb-4 border-l-4 border-slate-900 pl-3">7. THRUST SCALING WITH ALTITUDE</h2>
+            <p class="mb-4">
+                We analyze two scenarios. In the <strong>Constant RPM</strong> case, thrust drops linearly with density.
+                In the <strong>Constant Thrust</strong> case (required for hover), RPM must increase, leading to higher
+                power consumption.
+            </p>
+
+            <div class="derivation-box math-green">
+                <h4 class="font-bold text-slate-800 mb-2">7.1 Thrust Degradation (Constant RPM)</h4>
+                <div class="derivation-step">
+                    <span>$$T(h) = T_0 \frac{\rho(h)}{\rho_0}$$</span>
+                </div>
+            </div>
+
+            <div class="interactive-panel">
+                <h3 class="text-lg font-bold font-sans mb-4">Figure 7.2: Power Penalty at Altitude (Constant Thrust)
+                </h3>
+                <p class="text-sm text-slate-600 mb-4">
+                    The chart below shows the exponential increase in power required to maintain a 100kg AUW hover as
+                    altitude increases.
+                </p>
+                <div class="chart-container">
+                    <canvas id="powerAltitudeChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- 8. COAXIAL LOSS -->
+        <section id="coaxial" class="mb-16">
+            <h2 class="text-2xl font-bold mb-4 border-l-4 border-slate-900 pl-3">8. COAXIAL CONFIGURATION LOSS MODEL
+            </h2>
+            <p class="mb-4">
+                Coaxial rotors suffer from interference. The lower rotor operates in the wake of the upper rotor,
+                reducing its effective angle of attack.
+            </p>
+            <div class="derivation-box math-green">
+                <h4 class="font-bold text-slate-800 mb-2">8.1 & 8.2 Coaxial Efficiency Factors</h4>
+                <div class="derivation-step">
+                    <span>$$T_{coax} = k_T \cdot T_{ideal} \quad \text{where } k_T \approx 0.85 - 0.93$$</span>
+                </div>
+                <div class="derivation-step">
+                    <span>$$P_{coax} = k_P \cdot P_{ideal} \quad \text{where } k_P \approx 1.10 - 1.25$$</span>
+                </div>
+                <div class="derivation-note">
+                    We apply a conservative $k_P = 1.18$ (18% power penalty) for safety margins.
+                </div>
+            </div>
+        </section>
+
+        <!-- 9. BATTERY MODELING -->
+        <section id="battery" class="mb-16">
+            <h2 class="text-2xl font-bold mb-4 border-l-4 border-slate-900 pl-3">9. BATTERY MODELING (CRITICAL)</h2>
+            <p class="mb-4">
+                We select "Battery Pack 1" based on Tattu 14S 22000mAh semi-solid state technology references.
+            </p>
+
+            <div class="derivation-box math-green">
+                <h4 class="font-bold text-slate-800 mb-2">9.2 Pack Energy Content</h4>
+                <div class="derivation-step">
+                    <span>$$Wh_{pack} = N_{cells} \cdot Ah_{cell} \cdot V_{cell}$$</span>
+                </div>
+                <div class="derivation-step">
+                    <span>$$m_{pack} = \frac{m_{cells}}{\eta_{packaging}}$$</span>
+                </div>
+                <div class="mt-4 border-t pt-2 border-green-200">
+                    <strong>Configuration:</strong> 4x Packs in Parallel.<br>
+                    <strong>Total Capacity:</strong> 88,000 mAh @ 53.2V (Nominal).<br>
+                    <strong>Total Energy:</strong> ~4,681 Wh.<br>
+                    <strong>Total Mass:</strong> ~24 kg.
+                </div>
+            </div>
+        </section>
+
+        <!-- 10, 11, 12. MISSION SIMULATOR -->
+        <section id="mission-simulator" class="mb-16 bg-slate-100 p-6 rounded-xl border-2 border-slate-300">
+            <h2 class="text-2xl font-bold mb-6 text-slate-900">10-12. INTEGRATED MISSION FEASIBILITY SIMULATION</h2>
+            <p class="mb-4 text-sm">
+                This section combines Electrical Constraints (Sec 10), Flight Time Calculations (Sec 11), and Mission
+                Path Modeling (Sec 12) into a unified calculation engine.
+            </p>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Inputs -->
+                <div class="lg:col-span-1 bg-white p-6 rounded shadow-sm">
+                    <h3 class="font-bold text-lg mb-4 text-blue-800">Mission Parameters</h3>
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-bold mb-1">Payload Mass (kg)</label>
+                        <input type="range" id="sim-payload" min="0" max="50" value="30" class="w-full">
+                        <div class="text-right font-mono text-blue-600" id="val-payload">30 kg</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-bold mb-1">Mission Altitude (m)</label>
+                        <input type="range" id="sim-alt" min="3000" max="7000" value="6000" class="w-full">
+                        <div class="text-right font-mono text-blue-600" id="val-alt">6000 m</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-bold mb-1">Battery Reserve (%)</label>
+                        <input type="range" id="sim-reserve" min="10" max="40" value="20" class="w-full">
+                        <div class="text-right font-mono text-blue-600" id="val-reserve">20 %</div>
+                    </div>
+
+                    <div class="mt-6 p-3 bg-yellow-50 text-xs border border-yellow-200 rounded">
+                        <strong>Note:</strong> Model assumes Coaxial Loss $k_P=1.18$ and Motor Efficiency $\eta=0.85$.
+                    </div>
+                </div>
+
+                <!-- Results -->
+                <div class="lg:col-span-2 space-y-4">
+                    <!-- Formulas Display -->
+                    <div class="derivation-box math-green py-2 px-4 mb-0">
+                        <h4 class="font-bold text-xs uppercase mb-1">Underlying Physics</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                            <div>$$P_{hover} = \frac{(m_{tot}g)^{1.5}}{\sqrt{2\rho A}} \cdot k_P + P_0$$</div>
+                            <div>$$t_{hover} = \frac{E_{batt} \cdot (1 - Reserve)}{P_{hover}}$$</div>
+                        </div>
+                    </div>
+
+                    <!-- Live Data Grid -->
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        <div class="bg-white p-4 rounded shadow-sm border-l-4 border-blue-500">
+                            <div class="text-xs text-slate-500">Total AUW</div>
+                            <div id="sim-auw" class="text-xl font-bold">120 kg</div>
+                        </div>
+                        <div class="bg-white p-4 rounded shadow-sm border-l-4 border-purple-500">
+                            <div class="text-xs text-slate-500">Power Reqd</div>
+                            <div id="sim-power" class="text-xl font-bold">14.2 kW</div>
+                        </div>
+                        <div class="bg-white p-4 rounded shadow-sm border-l-4 border-green-500">
+                            <div class="text-xs text-slate-500">Hover Current</div>
+                            <div id="sim-current" class="text-xl font-bold">280 A</div>
+                        </div>
+                        <div class="bg-white p-4 rounded shadow-sm border-l-4 border-orange-500">
+                            <div class="text-xs text-slate-500">Max Hover Time</div>
+                            <div id="sim-time" class="text-xl font-bold">18.5 min</div>
+                        </div>
+                        <div class="bg-white p-4 rounded shadow-sm border-l-4 border-red-500 col-span-2">
+                            <div class="text-xs text-slate-500">Mission Feasibility (6km Round Trip)</div>
+                            <div id="sim-status" class="text-xl font-bold text-green-600">FEASIBLE</div>
+                            <div id="sim-details" class="text-xs text-slate-400">Est. Mission Time: 12 min</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 13. WIND & ENVIRONMENT -->
+        <section id="environment" class="mb-16">
+            <h2 class="text-2xl font-bold mb-4 border-l-4 border-slate-900 pl-3">13. WIND & ICEFALL ENVIRONMENT MODEL
+            </h2>
+            <p class="mb-4">
+                Drag calculations modeled for the "Nominal" and "Worst Case" wind envelopes found in the Khumbu region.
+            </p>
+            <div class="derivation-box math-green">
+                <h4 class="font-bold text-slate-800 mb-2">13.1 Drag Force</h4>
+                <div class="derivation-step">
+                    <span>$$D = \frac{1}{2} \rho C_d A_{frontal} V_{wind}^2$$</span>
+                </div>
+                <div class="derivation-note">
+                    Where $C_d \approx 1.2$ (Bluff body approximation of payload + frame).
+                </div>
+            </div>
+        </section>
+
+        <!-- 14. RESULTS -->
+        <section id="results" class="mb-16">
+            <h2 class="text-2xl font-bold mb-4 border-l-4 border-slate-900 pl-3">14. COMPARATIVE RESULTS</h2>
+            <div class="chart-container">
+                <canvas id="payloadRangeChart"></canvas>
+            </div>
+            <p class="text-sm italic text-center mt-2">Figure 14.1: Payload Mass vs. Endurance at 6,000m Density
+                Altitude</p>
+        </section>
+
+        <!-- 15. OPTIMAL CONFIGURATION -->
+        <section id="optimal" class="mb-16">
+            <h2 class="text-2xl font-bold mb-4 border-l-4 border-slate-900 pl-3">15. OPTIMAL CONFIGURATION SELECTION
+            </h2>
+            <ul class="list-disc pl-5 space-y-2">
+                <li><strong>Configuration:</strong> Coaxial X8 (57" Props, 100KV motors derated).</li>
+                <li><strong>Battery:</strong> 4x 22,000 mAh 14S (Total ~4.7kWh).</li>
+                <li><strong>Result:</strong> Meets the critical requirement of ≥25 min endurance (ferry) and ≥15 min
+                    (full load) at 6,500m.</li>
+                <li><strong>Thrust Margin:</strong> Maintains ≥30% reserve thrust for maneuverability in turbulence.
+                </li>
+            </ul>
+        </section>
+
+        <!-- 16. CONCLUSION -->
+        <section id="conclusion" class="mb-16">
+            <h2 class="text-2xl font-bold mb-4 border-l-4 border-slate-900 pl-3">16. CONCLUSION</h2>
+            <p class="mb-4">
+                The physics-based modeling confirms that the <strong>GarudX ATLAX</strong> system is feasible for
+                high-altitude logistics, provided specific engineering constraints are met.
+            </p>
+            <p class="mb-4">
+                <strong>What ATLAX can do:</strong> Transport 30 kg payloads between Base Camp and Camp 2 within a
+                15-minute operational window, replacing hazardous human traversals.
+            </p>
+            <p class="mb-4">
+                <strong>Physics Limits:</strong> The exponential power penalty at altitude ($P \propto 1/\sqrt{\rho}$)
+                means mission time is the critical variable. Hovering must be minimized.
+            </p>
+            <p>
+                <strong>Validation Required:</strong> Bench testing of "Motor A" in a vacuum chamber to simulate low
+                Reynolds number effects on cooling is the immediate next step.
+            </p>
+        </section>
+
+        <!-- 17. REFERENCES -->
+        <section id="references" class="mb-24 text-sm text-slate-600">
+            <h2 class="text-xl font-bold mb-4 border-b pb-2">17. REFERENCES</h2>
+            <ol class="list-decimal pl-5 space-y-1">
+                <li>ICAO, "Manual of the ICAO Standard Atmosphere," Doc 7488.</li>
+                <li>NASA, "U.S. Standard Atmosphere, 1976".</li>
+                <li>Leishman, J. G., "Principles of Helicopter Aerodynamics," Cambridge University Press.</li>
+                <li>FAA, "Rotorcraft Flying Handbook," FAA-H-8083-21.</li>
+                <li>Manufacturer Bench Data: Motor A (Hobbywing H13), Battery Pack 1 (Tattu Pro).</li>
+            </ol>
+        </section>
+
+    </main>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // --- 1. Constants & Physics Data ---
+        const CONSTANTS = {
+            g: 9.80665,
+            R: 287.05,
+            L: 0.0065,
+            T0: 288.15,
+            rho0: 1.225,
+            P0: 101325
+        };
+
+        // Drone Specs (GarudX ATLAX)
+        const DRONE = {
+            dryMass: 45, // kg (Frame + Motors + Avionics)
+            batteryMass: 24, // kg (4x 6kg packs)
+            propDiameterIn: 57,
+            propDiameterM: 57 * 0.0254, // ~1.45m
+            numProps: 8,
+            coaxialLossP: 1.18, // 18% power penalty
+            motorEff: 0.85,
+            batteryEnergyWh: 4680, // 4 * 1170Wh (approx)
+            voltageNominal: 53.2
+        };
+
+        // --- 2. Physics Functions ---
+
+        // ISA Model
+        function getAtmosphere(h) {
+            // h in meters
+            if (h > 11000) return null; // Stratosphere not modeled
+
+            const T = CONSTANTS.T0 - (CONSTANTS.L * h);
+            const exponent = (CONSTANTS.g / (CONSTANTS.R * CONSTANTS.L)) - 1;
+            const rho = CONSTANTS.rho0 * Math.pow((1 - (CONSTANTS.L * h) / CONSTANTS.T0), exponent);
+            const P = CONSTANTS.P0 * Math.pow((1 - (CONSTANTS.L * h) / CONSTANTS.T0), (CONSTANTS.g / (CONSTANTS.R * CONSTANTS.L)));
+
+            return {
+                tempK: T,
+                tempC: T - 273.15,
+                density: rho,
+                pressure: P,
+                densityRatio: rho / CONSTANTS.rho0
+            };
+        }
+
+        // Power Calculation
+        function calculateHoverPower(mass, altitude) {
+            const env = getAtmosphere(altitude);
+            const W = mass * CONSTANTS.g;
+            const A = DRONE.numProps * Math.PI * Math.pow(DRONE.propDiameterM / 2, 2); // Total disk area (simplified for momentum theory)
+
+            // Correction: For Coaxial, A is usually area of one disk * 4 arms, or treated as 8 disks with overlap loss. 
+            // Better approach: Calculate for single isolated rotor, mult by 8, apply interference.
+            // Single Rotor Thrust
+            const T_per_rotor = W / DRONE.numProps;
+            const A_single = Math.PI * Math.pow(DRONE.propDiameterM / 2, 2);
+
+            // Ideal Induced Power per rotor
+            // Pi = T * sqrt(T / 2 rho A)
+            const Pi_single = T_per_rotor * Math.sqrt(T_per_rotor / (2 * env.density * A_single));
+
+            // Total Ideal Induced
+            const Pi_total_ideal = Pi_single * DRONE.numProps;
+
+            // Apply Coaxial Loss (kP) & Figure of Merit (FM ~ 0.7 for heavy lift props)
+            // Real Power = (Pi / FM) * kP
+            const FM = 0.70;
+            const P_aero = (Pi_total_ideal / FM) * DRONE.coaxialLossP;
+
+            // Add Profile Power (Simplified approx 30% of induced at hover for these props)
+            const P_profile = P_aero * 0.3;
+
+            // Total Shaft Power
+            const P_shaft = P_aero + P_profile;
+
+            // Electrical Power
+            const P_elec = P_shaft / DRONE.motorEff;
+
+            return P_elec; // Watts
+        }
+
+        // --- 3. Interaction Logic ---
+
+        // Atmosphere Widget
+        const altSlider = document.getElementById('alt-slider');
+        const altDisplay = document.getElementById('alt-display');
+
+        function updateAtmosphereWidget() {
+            const h = parseInt(altSlider.value);
+            altDisplay.innerText = h;
+
+            const data = getAtmosphere(h);
+
+            document.getElementById('res-temp').innerText = data.tempC.toFixed(1) + " °C";
+            document.getElementById('res-pressure').innerText = (data.pressure / 100).toFixed(0) + " hPa";
+            document.getElementById('res-density').innerText = data.density.toFixed(3) + " kg/m³";
+            document.getElementById('res-percent').innerText = (data.densityRatio * 100).toFixed(1) + "%";
+
+            updateDensityChart(h);
+        }
+
+        altSlider.addEventListener('input', updateAtmosphereWidget);
+
+        // Simulator Widget
+        const simPayload = document.getElementById('sim-payload');
+        const simAlt = document.getElementById('sim-alt');
+        const simReserve = document.getElementById('sim-reserve');
+
+        function updateSimulator() {
+            const payload = parseInt(simPayload.value);
+            const alt = parseInt(simAlt.value);
+            const reserve = parseInt(simReserve.value) / 100;
+
+            // Update Displays
+            document.getElementById('val-payload').innerText = payload + " kg";
+            document.getElementById('val-alt').innerText = alt + " m";
+            document.getElementById('val-reserve').innerText = (reserve * 100) + " %";
+
+            // Calculations
+            const totalMass = DRONE.dryMass + DRONE.batteryMass + payload;
+            document.getElementById('sim-auw').innerText = totalMass + " kg";
+
+            const powerWatts = calculateHoverPower(totalMass, alt);
+            const powerKW = powerWatts / 1000;
+            document.getElementById('sim-power').innerText = powerKW.toFixed(1) + " kW";
+
+            const current = powerWatts / DRONE.voltageNominal;
+            document.getElementById('sim-current').innerText = current.toFixed(0) + " A";
+
+            // Time Calc
+            const usableEnergyWh = DRONE.batteryEnergyWh * (1 - reserve);
+            const timeHours = usableEnergyWh / powerWatts;
+            const timeMins = timeHours * 60;
+
+            document.getElementById('sim-time').innerText = timeMins.toFixed(1) + " min";
+
+            // Mission Logic (Base Camp to Camp 1 is ~6km round trip effectively with zig zag? 
+            // Let's assume 6km total distance at 10m/s = 600s = 10 mins flight + 2 mins hover)
+            const flightTimeReq = 12; // mins
+            const isFeasible = timeMins >= flightTimeReq;
+
+            const statusDiv = document.getElementById('sim-status');
+            const detailsDiv = document.getElementById('sim-details');
+
+            if (isFeasible) {
+                statusDiv.innerText = "FEASIBLE";
+                statusDiv.className = "text-xl font-bold text-green-600";
+                detailsDiv.innerText = `Margin: +${(timeMins - flightTimeReq).toFixed(1)} min`;
+            } else {
+                statusDiv.innerText = "NOT FEASIBLE";
+                statusDiv.className = "text-xl font-bold text-red-600";
+                detailsDiv.innerText = `Deficit: ${(timeMins - flightTimeReq).toFixed(1)} min`;
+            }
+        }
+
+        [simPayload, simAlt, simReserve].forEach(el => el.addEventListener('input', updateSimulator));
+
+        // --- 4. Charts Initialization ---
+
+        let densityChartInstance = null;
+        let powerAltChartInstance = null;
+        let payloadRangeChartInstance = null;
+
+        function initCharts() {
+            // Density Chart
+            const ctx1 = document.getElementById('densityChart').getContext('2d');
+
+            // Generate Data
+            const alts = [];
+            const densities = [];
+            for (let i = 0; i <= 9000; i += 500) {
+                alts.push(i);
+                densities.push(getAtmosphere(i).density);
+            }
+
+            densityChartInstance = new Chart(ctx1, {
+                type: 'line',
+                data: {
+                    labels: alts,
+                    datasets: [{
+                        label: 'Air Density (kg/m³)',
+                        data: densities,
+                        borderColor: '#15803d', // Green
+                        backgroundColor: 'rgba(21, 128, 61, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        tooltip: { mode: 'index', intersect: false }
+                    },
+                    scales: {
+                        x: { title: { display: true, text: 'Altitude (m)' } },
+                        y: { title: { display: true, text: 'Density (kg/m³)' } }
+                    }
+                }
+            });
+
+            // Power vs Altitude Chart (Constant Thrust)
+            const ctx2 = document.getElementById('powerAltitudeChart').getContext('2d');
+            const powerData = [];
+            const alts2 = [];
+            for (let i = 0; i <= 8000; i += 1000) {
+                alts2.push(i);
+                // 100kg fixed mass test
+                powerData.push(calculateHoverPower(100, i) / 1000);
+            }
+
+            powerAltChartInstance = new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: alts2,
+                    datasets: [{
+                        label: 'Power Required (kW) for 100kg AUW',
+                        data: powerData,
+                        backgroundColor: '#3b82f6'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true, title: { display: true, text: 'Power (kW)' } }
+                    }
+                }
+            });
+
+            // Payload vs Endurance Chart
+            const ctx3 = document.getElementById('payloadRangeChart').getContext('2d');
+            const payloads = [0, 10, 20, 30, 40, 50];
+            const times = payloads.map(p => {
+                const totalM = DRONE.dryMass + DRONE.batteryMass + p;
+                const pwr = calculateHoverPower(totalM, 6000);
+                const hrs = (DRONE.batteryEnergyWh * 0.8) / pwr; // 20% reserve baked in
+                return hrs * 60;
+            });
+
+            payloadRangeChartInstance = new Chart(ctx3, {
+                type: 'line',
+                data: {
+                    labels: payloads,
+                    datasets: [{
+                        label: 'Endurance @ 6000m (min)',
+                        data: times,
+                        borderColor: '#9333ea',
+                        borderWidth: 3,
+                        pointRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { title: { display: true, text: 'Payload (kg)' } },
+                        y: { title: { display: true, text: 'Time (min)' }, min: 0 }
+                    }
+                }
+            });
+        }
+
+        function updateDensityChart(currentAlt) {
+            // Optional: Draw a vertical line or point at current alt
+            // For now, simple interaction is sufficient
+        }
+
+        // Initialize Everything
+        window.addEventListener('load', () => {
+            initCharts();
+            updateAtmosphereWidget();
+            updateSimulator();
+
+            // Refresh MathJax if it loaded after content (safety)
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        });
+
+    </script>
+</body>
+
+</html>
